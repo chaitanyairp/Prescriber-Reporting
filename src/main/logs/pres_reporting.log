@@ -1,0 +1,7 @@
+"07-Jan-23 21:48:53" - __main__ - INFO - Starting main() of run_prescriber_pipeline.
+"07-Jan-23 21:48:53" - create_objects - INFO - Starting func get_or_create_spark_session().
+"07-Jan-23 21:48:57" - create_objects - INFO - Spark session is created.
+"07-Jan-23 21:48:57" - create_objects - INFO - Spark session is returned.
+"07-Jan-23 21:48:57" - validations - INFO - Starting validate_spark_object()
+"07-Jan-23 21:49:00" - validations - INFO - [Row(current_timestamp()=datetime.datetime(2023, 1, 7, 21, 48, 59, 404000))]
+"07-Jan-23 21:49:00" - __main__ - INFO - Ending main() of run_prescriber_pipeline.
