@@ -1,5 +1,9 @@
+import os
+
 from create_objects import get_or_create_spark_session
-from validations import validate_spark_object
+from validations import validate_spark_object, print_schema_of_df, print_top_ten_rows
+from run_ingestion import read_city_file, read_fact_file
+import variables as gav
 
 import logging
 import logging.config
@@ -15,6 +19,23 @@ def main():
         spark = get_or_create_spark_session()
         # Validate spark session created.
         validate_spark_object(spark)
+
+        # Get file paths of city and fact files.
+        city_path = gav.city_file_path
+        city_file_name = os.listdir(city_path)[0]
+        city_path_with_name = city_path + city_file_name
+
+        fact_path = gav.fact_file_path
+        fact_file_name = os.listdir(fact_path)[0]
+        fact_path_with_name = fact_path + fact_file_name
+
+        # Read city file
+        city_df = read_city_file(spark, city_path_with_name)
+        print_schema_of_df(city_df, "city_df")
+        #print_top_ten_rows(city_df, "city_df")
+
+        # Read fact file
+        fact_df = read_fact_file(spark, fact_path_with_name)
 
         logger.info("Ending main() of run_prescriber_pipeline.")
     except Exception as exp:
