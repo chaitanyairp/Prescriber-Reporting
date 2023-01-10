@@ -1,10 +1,12 @@
 from pyspark.sql import SparkSession
 from pyspark import SparkConf
 
+import variables as gav
+
 import logging
 import logging.config
 
-logging.config.fileConfig(fname=r"C:\Users\chait\PycharmProjects\Prescriber Reporting\src\main\config\log_to_file.conf")
+logging.config.fileConfig(fname=gav.log_conf_file_path)
 logger = logging.getLogger(__name__)
 
 

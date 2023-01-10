@@ -1,8 +1,9 @@
 import logging
 import logging.config
 import pandas
+import variables as gav
 
-logging.config.fileConfig(fname=r"C:\Users\chait\PycharmProjects\Prescriber Reporting\src\main\config\log_to_file.conf")
+logging.config.fileConfig(fname=gav.log_conf_file_path)
 logger = logging.getLogger(__name__)
 
 
