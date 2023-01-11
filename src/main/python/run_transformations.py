@@ -59,7 +59,7 @@ def generate_fact_report(fact_df):
     try:
         logger.info("Started generate_fact_report().")
 
-        fact_df  = fact_df.filter(f.col("years_of_exp") >= 20 & f.col("years_of_exp") <= 50).select(
+        fact_df  = fact_df.filter((f.col("years_of_exp") >= 20) & (f.col("years_of_exp") <= 50)).select(
             "provider_id",
             "provider_name",
             "provider_city",
@@ -69,20 +69,22 @@ def generate_fact_report(fact_df):
             "years_of_exp"
         )
 
-        # Work pending???? Think abt transformations
         fact_agg_df = fact_df.groupBy("provider_state", "provider_id").agg(
+            f.first("provider_name").alias("provider_name"),
+            f.first("provider_city").alias("provider_city"),
+            f.first("country").alias("country"),
+            f.first("years_of_exp").alias("years_of_exp"),
             f.sum("claim_count").alias("total_trx_count")
         )
 
+        fact_rnk_df = fact_agg_df.withColumn("rnk", f.dense_rank().over(w.partitionBy("provider_state").orderBy(f.col("total_trx_count").desc())))
 
-        fact_df.join(fact_agg_df, )
-
-        fact_df.withColumn("rnk", f.dense_rank().over(w.partitionBy("provider_city", "provider_state").orderBy(f.col(""))))
+        fact_report_df = fact_rnk_df.filter("rnk <= 5").drop("rnk")
 
         logger.info("Completed generate_city_report().")
     except Exception as exp:
         logger.error("Error in generate_fact_report()", exc_info=True)
         raise
     else:
-        return 0
+        return fact_report_df
 

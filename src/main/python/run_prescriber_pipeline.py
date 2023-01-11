@@ -1,10 +1,12 @@
 import os
+import sys
 
 from create_objects import get_or_create_spark_session
 from validations import validate_spark_object, print_schema_of_df, print_top_ten_rows, get_count_of_df
 from run_ingestion import read_city_file, read_fact_file
 from run_pre_processing import run_data_cleaning_city, run_data_cleaning_fact
-from run_transformations import generate_city_report
+from run_transformations import generate_city_report, generate_fact_report
+from run_write_reports import write_reports_to_hdfs
 import variables as gav
 
 import logging
@@ -43,12 +45,12 @@ def main():
         get_count_of_df(fact_df, "fact_df")
         print_top_ten_rows(fact_df, "fact_df")
 
-        # Run pre processing for city file
+        # Run pre-processing for city file
         city_df = run_data_cleaning_city(city_df, "city_df")
         print_schema_of_df(city_df, "city_df")
         print_top_ten_rows(city_df, "city_df")
 
-        # Run pre processing for fact file
+        # Run pre-processing for fact file
         fact_df = run_data_cleaning_fact(fact_df, "fact_df")
         print_schema_of_df(fact_df, "fact_df")
         print_top_ten_rows(fact_df, "fact_df")
@@ -59,10 +61,20 @@ def main():
         print_top_ten_rows(city_report_df, "city_report_df")
 
         # Run transformations for fact report
+        fact_report_df = generate_fact_report(fact_df)
+        print_schema_of_df(fact_report_df, "fact_report_df")
+        print_top_ten_rows(fact_report_df, "fact_report_df")
+
+        # Write City report
+        write_reports_to_hdfs(city_report_df, "city_report_df", "json", gav.city_file_path + "\\output", 4, "bzip2")
+
+        # Write fact report
+        write_reports_to_hdfs(fact_report_df, "fact_report_df", "orc", gav.fact_file_path + "\\output", 1, "snappy")
 
         logger.info("Ending main() of run_prescriber_pipeline.")
     except Exception as exp:
         logger.error("Error in main() of run_prescriber_pipeline", exc_info=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
