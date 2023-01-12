@@ -34,7 +34,7 @@ LOGFILE="/home/azureuser/projects/PrescriberReporting/src/main/logs/${JOBNAME}_$
   if [ $status == 0 ]
     then
     echo "The HDFS output dir ${FACT_PATH} is available. Continue to delete the directory."
-    hdfs dfs -rm -R -f ${CITY_PATH}
+    hdfs dfs -rm -R -f ${FACT_PATH}
     echo "The HDFS output dir ${FACT_PATH} is deleted."
   fi
 

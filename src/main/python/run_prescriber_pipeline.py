@@ -47,7 +47,7 @@ def main():
             city_path_with_name = city_path
 
         fact_path = gav.fact_input_file_path
-        proc = Popen(["hadoop", "fs", "-ls", "-C", fact_path])
+        proc = Popen(["hadoop", "fs", "-ls", "-C", fact_path], stdout=PIPE, stderr=PIPE)
         (out, err) = proc.communicate()
         if err.decode() != "":
             logger.error(f"No Fact input file in location {fact_path}", exc_info=True)
