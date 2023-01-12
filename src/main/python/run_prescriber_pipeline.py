@@ -1,5 +1,6 @@
 import os
 import sys
+from subprocess import Popen, PIPE
 
 from create_objects import get_or_create_spark_session
 from validations import validate_spark_object, print_schema_of_df, print_top_ten_rows, get_count_of_df
@@ -24,14 +25,35 @@ def main():
         # Validate spark session created.
         validate_spark_object(spark)
 
+        # <----------------- Local development ------------------------------------>
         # Get file paths of city and fact files.
-        city_path = gav.city_file_path
-        city_file_name = os.listdir(city_path)[0]
-        city_path_with_name = city_path + "\\" + city_file_name
+        # This code is for local development.
+        # city_path = gav.city_file_path
+        # city_file_name = os.listdir(city_path)[0]
+        # city_path_with_name = city_path + "\\" + city_file_name
+        #
+        # fact_path = gav.fact_file_path
+        # fact_file_name = os.listdir(fact_path)[0]
+        # fact_path_with_name = fact_path + "\\" + fact_file_name
+        # <-----------------End of local development------------------------------->
 
-        fact_path = gav.fact_file_path
-        fact_file_name = os.listdir(fact_path)[0]
-        fact_path_with_name = fact_path + "\\" + fact_file_name
+        city_path = gav.city_input_file_path
+        proc = Popen(["hadoop", "fs", "-ls", "-C", city_path], stdout=PIPE, stderr=PIPE)
+        (out, err) = proc.communicate()
+        if err.decode() != "":
+            logger.error(f"No City input file in location {city_path}", exc_info=True)
+            raise
+        else:
+            city_path_with_name = city_path
+
+        fact_path = gav.fact_input_file_path
+        proc = Popen(["hadoop", "fs", "-ls", "-C", fact_path])
+        (out, err) = proc.communicate()
+        if err.decode() != "":
+            logger.error(f"No Fact input file in location {fact_path}", exc_info=True)
+            raise
+        else:
+            fact_path_with_name = fact_path
 
         # Read city file
         city_df = read_city_file(spark, city_path_with_name)
@@ -66,10 +88,10 @@ def main():
         print_top_ten_rows(fact_report_df, "fact_report_df")
 
         # Write City report
-        write_reports_to_hdfs(city_report_df, "city_report_df", "json", gav.city_file_path + "\\output", 4, "bzip2")
+        write_reports_to_hdfs(city_report_df, "city_report_df", "json", gav.city_output_file_path, 4, "bzip2")
 
         # Write fact report
-        write_reports_to_hdfs(fact_report_df, "fact_report_df", "orc", gav.fact_file_path + "\\output", 1, "snappy")
+        write_reports_to_hdfs(fact_report_df, "fact_report_df", "orc", gav.fact_output_file_path, 1, "snappy")
 
         logger.info("Ending main() of run_prescriber_pipeline.")
     except Exception as exp:
