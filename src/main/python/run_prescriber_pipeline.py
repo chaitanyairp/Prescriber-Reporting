@@ -7,7 +7,7 @@ from validations import validate_spark_object, print_schema_of_df, print_top_ten
 from run_ingestion import read_city_file, read_fact_file
 from run_pre_processing import run_data_cleaning_city, run_data_cleaning_fact
 from run_transformations import generate_city_report, generate_fact_report
-from run_write_reports import write_reports_to_hdfs, write_reports_to_hive
+from run_write_reports import write_reports_to_hdfs, write_reports_to_hive, write_reports_to_rdbms
 import variables as gav
 
 import logging
@@ -96,6 +96,8 @@ def main():
         # Write city and fact reports to hive
         write_reports_to_hive(spark, city_report_df, fact_report_df)
 
+        # Write reports to postgres
+        write_reports_to_rdbms(spark, city_report_df, fact_report_df)
 
         logger.info("Ending main() of run_prescriber_pipeline.")
     except Exception as exp:

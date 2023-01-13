@@ -1,0 +1,12 @@
+create database presreports;
+create user spark_user with encrypted password 'sparkuser';
+grant all on database presreports to spark_user;
+grant all on schema public to spark_user;
+
+
+\l - list databases
+\c db_name as user_name; - to use database
+\d - list tables in database;
+
+########### Lib is used for keeping all jars, libraries, drivers
+

@@ -15,10 +15,10 @@ def write_reports_to_hdfs(df, df_name, file_format, file_path, split_count=None,
         logger.info(f"Started write_report_to_hdfs for dataframe {df_name}")
 
         if compression_type:
-            df.write\
-                .format(file_format)\
-                .option("path", file_path)\
-                .option("compression", compression_type)\
+            df.write \
+                .format(file_format) \
+                .option("path", file_path) \
+                .option("compression", compression_type) \
                 .save()
         else:
             df.write \
@@ -40,16 +40,16 @@ def write_reports_to_hive(spark, city_df, fact_df):
 
         # Write city report to hive city_report table
         city_df = city_df.withColumn("kots", current_date())
-        city_df.write\
+        city_df.write \
             .format("orc") \
-            .partitionBy("kots")\
-            .mode("append")\
-            .option("path", "/PrescriberReports/hive/external/warehouse/prescriber.db")\
+            .partitionBy("kots") \
+            .mode("append") \
+            .option("path", "/PrescriberReports/hive/external/warehouse/prescriber.db") \
             .saveAsTable("prescriber.city_report")
 
         # Write fact report to hive fact_report table
         fact_df = fact_df.withColumn("kots", current_date())
-        fact_df.write\
+        fact_df.write \
             .format("orc") \
             .mode("append") \
             .partitionBy("kots") \
@@ -65,4 +65,34 @@ def write_reports_to_hive(spark, city_df, fact_df):
         logger.info("Done with write_reports_to_hive()..")
 
 
+def write_reports_to_rdbms(spark, city_df, fact_df):
+    try:
+        logger.info("Started write_reports_to_rdbms().")
 
+        # Save city_df to postgres
+        city_df.write.format("jdbc") \
+            .option("url", "jdbc:postgresql://localhost:6432/presreports") \
+            .option("driver", "org.postgresql.Driver") \
+            .option("dbtable", "city_report") \
+            .mode("append") \
+            .option("user", "spark_user") \
+            .option("password", "sparkuser") \
+            .save()
+
+        # Save fact report to postgres
+        fact_df.write.format("jdbc") \
+            .option("url", "jdbc:postgresql://localhost:6432/presreports") \
+            .option("driver", "org.postgresql.Driver") \
+            .option("dbtable", "fact_report") \
+            .mode("append") \
+            .option("user", "spark_user") \
+            .option("password", "sparkuser") \
+            .save()
+
+    except Exception as exp:
+        logger.error("Error in executing write_reports_to_rdbms()...", exc_info=True)
+        raise
+    else:
+        logger.info("Completed write_reports_to_rdbms()..")
+
+# /home/azureuser/projects/PrescriberReporting/src/main/lib
