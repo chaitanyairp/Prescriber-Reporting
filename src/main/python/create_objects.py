@@ -17,7 +17,14 @@ def get_or_create_spark_session():
         spark_conf.set("spark.app.name", "Prescriber Reporting")
         spark_conf.set("spark.master", "local[*]")
 
-        spark = SparkSession.builder.config(conf=spark_conf).getOrCreate()
+        spark = SparkSession\
+            .builder\
+            .config(conf=spark_conf)\
+            .enableHiveSupport()\
+            .getOrCreate()
+
+        # You can specify warehouse location: config("spark.sql.warehouse.dir", warehouse_location)
+
         logger.info("Spark session is created.")
     except Exception as exp:
         logger.error("Exception in func get_or_create_spark_session()", exc_info=True)
